@@ -344,6 +344,7 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
 {
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_bo *bo = (struct radeon_bo*)buf;
+    struct radeon_winsys *ws = (struct radeon_winsys *) cs->ws;
     enum radeon_bo_domain added_domains;
     unsigned index = radeon_add_reloc(cs, bo, usage, domains, &added_domains);
 
@@ -351,6 +352,14 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
         cs->csc->used_gart += bo->base.size;
     if (added_domains & RADEON_DOMAIN_VRAM)
         cs->csc->used_vram += bo->base.size;
+
+    if (ws->bo_stats_file) {
+        if (usage & RADEON_USAGE_WRITE) {
+            fprintf(ws->bo_stats_file, "%p write @%llu\n", bo, stats_time_get());
+        } else {
+            fprintf(ws->bo_stats_file, "%p read @%llu\n", bo, stats_time_get());
+        }
+    }
 
     return index;
 }
