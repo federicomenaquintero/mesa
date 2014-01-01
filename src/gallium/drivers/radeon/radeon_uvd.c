@@ -168,7 +168,7 @@ static bool create_buffer(struct ruvd_decoder *dec,
 			  struct ruvd_buffer *buffer,
 			  unsigned size)
 {
-	buffer->buf = dec->ws->buffer_create(dec->ws, size, 4096, false,
+	buffer->buf = dec->ws->buffer_create(dec->ws, size, 4096, false, true,
 					     RADEON_DOMAIN_GTT | RADEON_DOMAIN_VRAM);
 	if (!buffer->buf)
 		return false;
@@ -1008,7 +1008,7 @@ void ruvd_join_surfaces(struct radeon_winsys* ws, unsigned bind,
 	/* TODO: 2D tiling workaround */
 	alignment *= 2;
 
-	pb = ws->buffer_create(ws, size, alignment, bind, RADEON_DOMAIN_VRAM);
+	pb = ws->buffer_create(ws, size, alignment, bind, true, RADEON_DOMAIN_VRAM);
 	if (!pb)
 		return;
 

@@ -652,7 +652,7 @@ radeon_cs_create_fence(struct radeon_winsys_cs *rcs)
     struct pb_buffer *fence;
 
     /* Create a fence, which is a dummy BO. */
-    fence = cs->ws->base.buffer_create(&cs->ws->base, 1, 1, TRUE,
+    fence = cs->ws->base.buffer_create(&cs->ws->base, 1, 1, TRUE, FALSE,
                                        RADEON_DOMAIN_GTT);
     /* Add the fence as a dummy relocation. */
     cs->ws->base.cs_add_reloc(rcs, cs->ws->base.buffer_get_cs_handle(fence),
