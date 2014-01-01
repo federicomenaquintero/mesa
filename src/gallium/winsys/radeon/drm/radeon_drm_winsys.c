@@ -442,6 +442,9 @@ static void radeon_winsys_destroy(struct radeon_winsys *rws)
     }
     pipe_semaphore_destroy(&ws->cs_queued);
 
+    ws->kill_timing_thread = 1;
+    pipe_thread_wait(ws->timing_thread);
+
     pipe_mutex_destroy(ws->hyperz_owner_mutex);
     pipe_mutex_destroy(ws->cmask_owner_mutex);
     pipe_mutex_destroy(ws->cs_stack_lock);
@@ -596,6 +599,22 @@ static PIPE_THREAD_ROUTINE(radeon_drm_cs_emit_ioctl, param)
     return NULL;
 }
 
+static PIPE_THREAD_ROUTINE(radeon_drm_timing_thread, param)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys *) param;
+    uint64_t * const time = &ws->time;
+
+    while (!ws->kill_timing_thread) {
+        uint64_t tmp = os_time_get_nano() / 1000000;
+        p_atomic_set(time, tmp);
+
+        /* We want ms accuracy, so sleep for the Nyquist freq - 0.5ms */
+        usleep(500);
+    }
+
+    return NULL;
+}
+
 DEBUG_GET_ONCE_BOOL_OPTION(thread, "RADEON_THREAD", TRUE)
 static PIPE_THREAD_ROUTINE(radeon_drm_cs_emit_ioctl, param);
 
@@ -659,6 +678,12 @@ PUBLIC struct radeon_winsys *radeon_drm_winsys_create(int fd)
     pipe_semaphore_init(&ws->cs_queued, 0);
     if (ws->num_cpus > 1 && debug_get_option_thread())
         ws->thread = pipe_thread_create(radeon_drm_cs_emit_ioctl, ws);
+
+    /* Set the time once to avoid races - stats_time_get may be called
+     * just after this function returns.
+     */
+    ws->time = os_time_get_nano() / 1000000;
+    ws->timing_thread = pipe_thread_create(radeon_drm_timing_thread, ws);
 
     return &ws->base;
 
