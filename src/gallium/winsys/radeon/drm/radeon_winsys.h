@@ -40,6 +40,7 @@
  * - R16F/RG16F
  */
 
+#include <stdio.h>
 #include "pipebuffer/pb_buffer.h"
 #include "radeon_surface.h"
 
@@ -212,6 +213,11 @@ struct radeon_winsys {
      * The screen object this winsys was created for
      */
     struct pipe_screen *screen;
+
+    /**
+     * The bo statistics debug file, if any
+     */
+    FILE *bo_stats_file;
 
     /**
      * Destroy this winsys.
