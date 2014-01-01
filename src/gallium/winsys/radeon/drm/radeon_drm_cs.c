@@ -353,13 +353,7 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
     if (added_domains & RADEON_DOMAIN_VRAM)
         cs->csc->used_vram += bo->base.size;
 
-    if (ws->bo_stats_file) {
-        if (usage & RADEON_USAGE_WRITE) {
-            fprintf(ws->bo_stats_file, "%p write @%llu\n", bo, stats_time_get(ws));
-        } else {
-            fprintf(ws->bo_stats_file, "%p read @%llu\n", bo, stats_time_get(ws));
-        }
-    }
+    ws->base.update_bo_stats((struct radeon_winsys *) ws, buf, usage);
 
     return index;
 }
