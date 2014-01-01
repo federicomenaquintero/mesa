@@ -650,6 +650,8 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
     else if (rdesc->initial_domains & RADEON_DOMAIN_GTT)
         rws->allocated_gtt += align(size, 4096);
 
+    bo->stats.high_prio = rdesc->high_prio;
+
     if (rws->bo_stats_file) {
         fprintf(rws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
                                    bo->stats.high_prio, stats_time_get(rws));
@@ -870,6 +872,7 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
                         unsigned size,
                         unsigned alignment,
                         boolean use_reusable_pool,
+                        boolean high_prio,
                         enum radeon_bo_domain domain)
 {
     struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
@@ -884,6 +887,7 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
     /* Additional criteria for the cache manager. */
     desc.base.usage = domain;
     desc.initial_domains = domain;
+    desc.high_prio = high_prio;
 
     /* Assign a buffer manager. */
     if (use_reusable_pool)

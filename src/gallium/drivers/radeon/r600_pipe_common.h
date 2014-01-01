@@ -278,7 +278,8 @@ void *r600_buffer_map_sync_with_rings(struct r600_common_context *ctx,
 bool r600_init_resource(struct r600_common_screen *rscreen,
 			struct r600_resource *res,
 			unsigned size, unsigned alignment,
-			bool use_reusable_pool, unsigned usage);
+			bool use_reusable_pool, unsigned usage,
+			bool high_prio);
 struct pipe_resource *r600_buffer_create(struct pipe_screen *screen,
 					 const struct pipe_resource *templ,
 					 unsigned alignment);
