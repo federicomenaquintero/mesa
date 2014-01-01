@@ -45,6 +45,20 @@ struct radeon_bo_desc {
     unsigned initial_domains;
 };
 
+struct radeon_bo_stats {
+    uint64_t num_reads;
+    uint64_t num_writes;
+    uint64_t num_cpu_ops;
+
+    /* Milliseconds in a monotonic clock */
+    uint64_t last_read_time;
+    uint64_t last_write_time;
+    uint64_t last_cpu_time;
+
+    /* Depth, MSAA, etc. */
+    bool high_prio;
+};
+
 struct radeon_bo {
     struct pb_buffer base;
 
@@ -68,6 +82,8 @@ struct radeon_bo {
 
     boolean flinked;
     uint32_t flink;
+
+    struct radeon_bo_stats stats;
 };
 
 struct pb_manager *radeon_bomgr_create(struct radeon_drm_winsys *rws);

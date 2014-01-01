@@ -361,6 +361,14 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
         }
     }
 
+    if (usage & RADEON_USAGE_WRITE) {
+        bo->stats.num_writes++;
+        bo->stats.last_write_time = stats_time_get();
+    } else {
+        bo->stats.num_reads++;
+        bo->stats.last_read_time = stats_time_get();
+    }
+
     return index;
 }
 
