@@ -370,6 +370,7 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
 {
     struct radeon_bo *bo = radeon_bo(_buf);
     struct radeon_bomgr *mgr = bo->mgr;
+    struct radeon_winsys *ws = (struct radeon_winsys *) mgr->rws;
     struct drm_gem_close args;
 
     memset(&args, 0, sizeof(args));
@@ -399,6 +400,11 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
         bo->rws->allocated_vram -= align(bo->base.size, 4096);
     else if (bo->initial_domain & RADEON_DOMAIN_GTT)
         bo->rws->allocated_gtt -= align(bo->base.size, 4096);
+
+    if (ws->bo_stats_file) {
+        fprintf(ws->bo_stats_file, "%p destroyed @%llu\n", bo, stats_time_get(ws));
+    }
+
     FREE(bo);
 }
 
@@ -450,6 +456,7 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
 {
     struct radeon_bo *bo = (struct radeon_bo*)buf;
     struct radeon_drm_cs *cs = (struct radeon_drm_cs*)rcs;
+    struct radeon_winsys *ws = (struct radeon_winsys *) bo->mgr->rws;
 
     /* If it's not unsynchronized bo_map, flush CS if needed and then wait. */
     if (!(usage & PIPE_TRANSFER_UNSYNCHRONIZED)) {
@@ -518,6 +525,10 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
         }
     }
 
+    if (ws->bo_stats_file) {
+        fprintf(ws->bo_stats_file, "%p cpu mapped @%llu\n", bo, stats_time_get(ws));
+    }
+
     return radeon_bo_do_map(bo);
 }
 
@@ -562,6 +573,7 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
 {
     struct radeon_bomgr *mgr = radeon_bomgr(_mgr);
     struct radeon_drm_winsys *rws = mgr->rws;
+    struct radeon_winsys *ws = (struct radeon_winsys *) rws;
     struct radeon_bo *bo;
     struct drm_radeon_gem_create args;
     struct radeon_bo_desc *rdesc = (struct radeon_bo_desc*)desc;
@@ -635,6 +647,11 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
         rws->allocated_vram += align(size, 4096);
     else if (rdesc->initial_domains & RADEON_DOMAIN_GTT)
         rws->allocated_gtt += align(size, 4096);
+
+    if (ws->bo_stats_file) {
+        fprintf(ws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
+                                   bo->stats.high_prio, stats_time_get(ws));
+    }
 
     return &bo->base;
 }

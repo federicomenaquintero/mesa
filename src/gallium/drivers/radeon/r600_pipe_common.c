@@ -26,10 +26,17 @@
 
 #include "r600_pipe_common.h"
 #include "r600_cs.h"
+#include "../../winsys/radeon/drm/radeon_drm_winsys.h"
+#include "os/os_time.h"
 #include "tgsi/tgsi_parse.h"
 #include "util/u_format_s3tc.h"
 #include "util/u_upload_mgr.h"
 #include <inttypes.h>
+
+#ifdef __GLIBC__
+#define _GNU_SOURCE
+#include <errno.h>
+#endif
 
 static const struct debug_named_value common_debug_options[] = {
 	/* logging */
@@ -38,6 +45,7 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "compute", DBG_COMPUTE, "Print compute info" },
 	{ "vm", DBG_VM, "Print virtual addresses when creating resources" },
 	{ "trace_cs", DBG_TRACE_CS, "Trace cs and write rlockup_<csid>.c file with faulty cs" },
+	{ "bostats", DBG_BO_STATS, "Write bo statistics to /tmp/bostats.<pid>[.name]" },
 
 	/* shaders */
 	{ "fs", DBG_FS, "Print fetch shaders" },
@@ -209,6 +217,24 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 		return false;
 	}
 
+	if (rscreen->debug_flags & DBG_BO_STATS) {
+		char statsfile[80];
+		const pid_t pid = getpid();
+
+#ifdef __GLIBC__
+		snprintf(statsfile, 80, "/tmp/bostats.%u.%s", pid, program_invocation_short_name);
+#else
+		snprintf(statsfile, 80, "/tmp/bostats.%u", pid);
+#endif
+
+		rscreen->ws->bo_stats_file = fopen(statsfile, "w");
+		if (!rscreen->ws->bo_stats_file)
+			fprintf(stderr, "Failed to open bo stats file %s\n", statsfile);
+		else
+			fprintf(rscreen->ws->bo_stats_file, "started @%llu\n",
+				stats_time_get(ws));
+	}
+
 	util_format_s3tc_init();
 
 	pipe_mutex_init(rscreen->aux_context_lock);
@@ -217,6 +243,12 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 
 void r600_common_screen_cleanup(struct r600_common_screen *rscreen)
 {
+	if ((rscreen->debug_flags & DBG_BO_STATS) && rscreen->ws->bo_stats_file) {
+		fflush(rscreen->ws->bo_stats_file);
+		fclose(rscreen->ws->bo_stats_file);
+		rscreen->ws->bo_stats_file = NULL;
+	}
+
 	pipe_mutex_destroy(rscreen->aux_context_lock);
 	rscreen->aux_context->destroy(rscreen->aux_context);
 }
