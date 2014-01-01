@@ -541,6 +541,17 @@ struct radeon_winsys {
      * Enable bo statistics logging.
      */
     void (*enable_bo_stats)(struct radeon_winsys *ws);
+
+    /**
+     * Update bo statistics.
+     * The buf and usage params match those in cs_add_reloc.
+     *
+     * \param buf A winsys buffer to validate.
+     * \param usage   Whether the buffer is used for read and/or write.
+     */
+    void (*update_bo_stats)(struct radeon_winsys *rws,
+                            struct radeon_winsys_cs_handle *buf,
+                            enum radeon_bo_usage usage);
 };
 
 /**

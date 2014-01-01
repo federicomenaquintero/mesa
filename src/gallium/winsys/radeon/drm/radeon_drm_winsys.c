@@ -564,6 +564,30 @@ static void radeon_enable_bo_stats(struct radeon_winsys *rws)
             stats_time_get(ws));
 }
 
+static void radeon_update_bo_stats(struct radeon_winsys *rws,
+                                   struct radeon_winsys_cs_handle *buf,
+                                   enum radeon_bo_usage usage)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+    struct radeon_bo *bo = (struct radeon_bo*)buf;
+
+    if (ws->bo_stats_file) {
+        if (usage & RADEON_USAGE_WRITE) {
+            fprintf(ws->bo_stats_file, "%p write @%llu\n", bo, stats_time_get(ws));
+        } else {
+            fprintf(ws->bo_stats_file, "%p read @%llu\n", bo, stats_time_get(ws));
+        }
+    }
+
+    if (usage & RADEON_USAGE_WRITE) {
+        bo->stats.num_writes++;
+        bo->stats.last_write_time = stats_time_get(ws);
+    } else {
+        bo->stats.num_reads++;
+        bo->stats.last_read_time = stats_time_get(ws);
+    }
+}
+
 static unsigned hash_fd(void *key)
 {
     int fd = pointer_to_intptr(key);
@@ -701,6 +725,7 @@ PUBLIC struct radeon_winsys *radeon_drm_winsys_create(int fd)
     ws->base.surface_best = radeon_drm_winsys_surface_best;
     ws->base.query_value = radeon_query_value;
     ws->base.enable_bo_stats = radeon_enable_bo_stats;
+    ws->base.update_bo_stats = radeon_update_bo_stats;
 
     radeon_bomgr_init_functions(ws);
     radeon_drm_cs_init_functions(ws);

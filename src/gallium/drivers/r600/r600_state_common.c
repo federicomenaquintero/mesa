@@ -518,6 +518,7 @@ static void r600_set_vertex_buffers(struct pipe_context *ctx,
 	struct pipe_vertex_buffer *vb = state->vb + start_slot;
 	unsigned i;
 	uint32_t disable_mask = 0;
+	uint32_t skipped_mask = 0;
 	/* These are the new buffers set by this function. */
 	uint32_t new_buffer_mask = 0;
 
@@ -553,6 +554,17 @@ static void r600_set_vertex_buffers(struct pipe_context *ctx,
 	rctx->vertex_buffer_state.dirty_mask |= new_buffer_mask;
 
 	r600_vertex_buffers_dirty(rctx);
+
+	/* Update statistics for the skipped vertex buffers */
+	skipped_mask = rctx->vertex_buffer_state.enabled_mask &
+				~rctx->vertex_buffer_state.dirty_mask;
+	while (skipped_mask) {
+		struct r600_resource *rbuffer;
+		i = u_bit_scan(&skipped_mask);
+
+		rbuffer = (struct r600_resource*)vb[i].buffer;
+		rctx->b.ws->update_bo_stats(rctx->b.ws, rbuffer->cs_buf, RADEON_USAGE_READ);
+	}
 }
 
 void r600_sampler_views_dirty(struct r600_context *rctx,
@@ -575,6 +587,7 @@ static void r600_set_sampler_views(struct pipe_context *pipe, unsigned shader,
 	struct r600_pipe_sampler_view **rviews = (struct r600_pipe_sampler_view **)views;
 	uint32_t dirty_sampler_states_mask = 0;
 	unsigned i;
+	uint32_t skipped_mask = 0;
 	/* This sets 1-bit for textures with index >= count. */
 	uint32_t disable_mask = ~((1ull << count) - 1);
 	/* These are the new textures set by this function. */
@@ -653,6 +666,16 @@ static void r600_set_sampler_views(struct pipe_context *pipe, unsigned shader,
 	if (dirty_sampler_states_mask) {
 		dst->states.dirty_mask |= dirty_sampler_states_mask;
 		r600_sampler_states_dirty(rctx, &dst->states);
+	}
+
+	/* Update statistics for the skipped samplers */
+	skipped_mask = dst->views.enabled_mask & ~dst->views.dirty_mask;
+	while (skipped_mask) {
+		i = u_bit_scan(&skipped_mask);
+
+		rctx->b.ws->update_bo_stats(rctx->b.ws,
+						rviews[i]->tex_resource->cs_buf,
+						RADEON_USAGE_READ);
 	}
 }
 
