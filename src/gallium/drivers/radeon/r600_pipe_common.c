@@ -38,6 +38,7 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "compute", DBG_COMPUTE, "Print compute info" },
 	{ "vm", DBG_VM, "Print virtual addresses when creating resources" },
 	{ "trace_cs", DBG_TRACE_CS, "Trace cs and write rlockup_<csid>.c file with faulty cs" },
+	{ "bostats", DBG_BO_STATS, "Write bo statistics to /tmp/bostats.<pid>[.name]" },
 
 	/* shaders */
 	{ "fs", DBG_FS, "Print fetch shaders" },
@@ -207,6 +208,10 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 
 	if (!r600_init_tiling(rscreen)) {
 		return false;
+	}
+
+	if (rscreen->debug_flags & DBG_BO_STATS) {
+		ws->enable_bo_stats(ws);
 	}
 
 	util_format_s3tc_init();
