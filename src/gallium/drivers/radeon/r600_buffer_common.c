@@ -98,7 +98,8 @@ void *r600_buffer_map_sync_with_rings(struct r600_common_context *ctx,
 bool r600_init_resource(struct r600_common_screen *rscreen,
 			struct r600_resource *res,
 			unsigned size, unsigned alignment,
-			bool use_reusable_pool, unsigned usage)
+			bool use_reusable_pool, unsigned usage,
+			bool high_prio)
 {
 	uint32_t initial_domain, domains;
 
@@ -131,6 +132,7 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 
 	res->buf = rscreen->ws->buffer_create(rscreen->ws, size, alignment,
                                               use_reusable_pool,
+                                              high_prio,
                                               initial_domain);
 	if (!res->buf) {
 		return false;
@@ -314,7 +316,7 @@ struct pipe_resource *r600_buffer_create(struct pipe_screen *screen,
 	rbuffer->b.vtbl = &r600_buffer_vtbl;
 	util_range_init(&rbuffer->valid_buffer_range);
 
-	if (!r600_init_resource(rscreen, rbuffer, templ->width0, alignment, TRUE, templ->usage)) {
+	if (!r600_init_resource(rscreen, rbuffer, templ->width0, alignment, TRUE, templ->usage, FALSE)) {
 		FREE(rbuffer);
 		return NULL;
 	}
