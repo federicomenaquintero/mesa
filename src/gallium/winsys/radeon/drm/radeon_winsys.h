@@ -536,6 +536,11 @@ struct radeon_winsys {
 
     uint64_t (*query_value)(struct radeon_winsys *ws,
                             enum radeon_value_id value);
+
+    /**
+     * Enable bo statistics logging.
+     */
+    void (*enable_bo_stats)(struct radeon_winsys *ws);
 };
 
 /**
