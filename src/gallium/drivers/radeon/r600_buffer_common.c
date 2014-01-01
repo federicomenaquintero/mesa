@@ -25,6 +25,7 @@
  */
 
 #include "r600_cs.h"
+#include "util/u_format.h"
 #include "util/u_memory.h"
 #include "util/u_upload_mgr.h"
 #include <inttypes.h>
@@ -101,6 +102,12 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 			bool use_reusable_pool, unsigned usage)
 {
 	uint32_t initial_domain, domains;
+	bool high_prio = false;
+
+	/* If it's depth or MSAA, consider it high priority */
+	if (util_format_has_depth(util_format_description(res->b.b.format)) ||
+		res->b.b.nr_samples > 1)
+		high_prio = true;
 
 	switch(usage) {
 	case PIPE_USAGE_STAGING:
@@ -131,6 +138,7 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 
 	res->buf = rscreen->ws->buffer_create(rscreen->ws, size, alignment,
                                               use_reusable_pool,
+                                              high_prio,
                                               initial_domain);
 	if (!res->buf) {
 		return false;

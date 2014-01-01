@@ -250,6 +250,7 @@ struct radeon_winsys {
      * \param size      The size to allocate.
      * \param alignment An alignment of the buffer in memory.
      * \param use_reusable_pool Whether the cache buffer manager should be used.
+     * \param high_prio Whether this bo should be considered high priority
      * \param domain    A bitmask of the RADEON_DOMAIN_* flags.
      * \return          The created buffer object.
      */
@@ -257,6 +258,7 @@ struct radeon_winsys {
                                        unsigned size,
                                        unsigned alignment,
                                        boolean use_reusable_pool,
+                                       boolean high_prio,
                                        enum radeon_bo_domain domain);
 
     struct radeon_winsys_cs_handle *(*buffer_get_cs_handle)(

@@ -42,6 +42,7 @@ struct radeon_bo_desc {
     struct pb_desc base;
 
     unsigned initial_domains;
+    bool high_prio;
 };
 
 struct radeon_bo_stats {
