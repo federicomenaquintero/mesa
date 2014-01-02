@@ -32,6 +32,7 @@
 
 #include "radeon_winsys.h"
 #include "os/os_thread.h"
+#include "os/os_time.h"
 
 struct radeon_drm_cs;
 
@@ -71,12 +72,23 @@ struct radeon_drm_winsys {
     int kill_thread;
     int ncs;
     struct radeon_drm_cs *cs_stack[RING_LAST];
+
+    /* Timing thread for the stats. */
+    pipe_thread timing_thread;
+    int kill_timing_thread;
+    uint64_t time;
 };
 
 static INLINE struct radeon_drm_winsys *
 radeon_drm_winsys(struct radeon_winsys *base)
 {
     return (struct radeon_drm_winsys*)base;
+}
+
+static INLINE unsigned long long stats_time_get(struct radeon_winsys * const ws) {
+    const struct radeon_drm_winsys * const dws = radeon_drm_winsys(ws);
+
+    return p_atomic_read(&dws->time);
 }
 
 void radeon_drm_ws_queue_cs(struct radeon_drm_winsys *ws, struct radeon_drm_cs *cs);

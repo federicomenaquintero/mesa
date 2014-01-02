@@ -35,7 +35,6 @@
 #include "radeon_drm_winsys.h"
 #include "pipebuffer/pb_bufmgr.h"
 #include "os/os_thread.h"
-#include "os/os_time.h"
 
 struct radeon_bomgr;
 
@@ -97,9 +96,5 @@ void radeon_bo_reference(struct radeon_bo **dst, struct radeon_bo *src)
 }
 
 void *radeon_bo_do_map(struct radeon_bo *bo);
-
-static INLINE unsigned long long stats_time_get() {
-    return os_time_get_nano() / 1000000;
-}
 
 #endif
