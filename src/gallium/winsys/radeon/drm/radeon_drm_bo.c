@@ -402,7 +402,7 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
         bo->rws->allocated_gtt -= align(bo->base.size, 4096);
 
     if (ws->bo_stats_file) {
-        fprintf(ws->bo_stats_file, "%p destroyed @%llu\n", bo, stats_time_get());
+        fprintf(ws->bo_stats_file, "%p destroyed @%llu\n", bo, stats_time_get(ws));
     }
 
     FREE(bo);
@@ -526,7 +526,7 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
     }
 
     if (ws->bo_stats_file) {
-        fprintf(ws->bo_stats_file, "%p cpu mapped @%llu\n", bo, stats_time_get());
+        fprintf(ws->bo_stats_file, "%p cpu mapped @%llu\n", bo, stats_time_get(ws));
     }
 
     bo->stats.num_cpu_ops++;
@@ -655,7 +655,7 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
 
     if (ws->bo_stats_file) {
         fprintf(ws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
-                                   bo->stats.high_prio, stats_time_get());
+                                   bo->stats.high_prio, stats_time_get(ws));
     }
 
     return &bo->base;

@@ -355,9 +355,9 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
 
     if (ws->bo_stats_file) {
         if (usage & RADEON_USAGE_WRITE) {
-            fprintf(ws->bo_stats_file, "%p write @%llu\n", bo, stats_time_get());
+            fprintf(ws->bo_stats_file, "%p write @%llu\n", bo, stats_time_get(ws));
         } else {
-            fprintf(ws->bo_stats_file, "%p read @%llu\n", bo, stats_time_get());
+            fprintf(ws->bo_stats_file, "%p read @%llu\n", bo, stats_time_get(ws));
         }
     }
 
