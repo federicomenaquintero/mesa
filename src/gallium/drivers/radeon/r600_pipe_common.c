@@ -231,7 +231,7 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 		if (!rscreen->ws->bo_stats_file)
 			fprintf(stderr, "Failed to open bo stats file %s\n", statsfile);
 		else
-			fprintf(rscreen->ws->bo_stats_file, "Started at %llu\n",
+			fprintf(rscreen->ws->bo_stats_file, "Started @%llu\n",
 				stats_time_get(ws));
 	}
 
