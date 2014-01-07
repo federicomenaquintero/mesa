@@ -615,7 +615,14 @@ r600_texture_create_object(struct pipe_screen *screen,
 		unsigned usage = rtex->surface.level[0].mode >= RADEON_SURF_MODE_1D ?
 					 PIPE_USAGE_STATIC : base->usage;
 
-		if (!r600_init_resource(rscreen, resource, rtex->size, base_align, FALSE, usage)) {
+		bool high_prio = false;
+
+		/* If it's depth or MSAA, consider it high priority */
+		if (rtex->is_depth || base->nr_samples > 1)
+			high_prio = true;
+
+		if (!r600_init_resource(rscreen, resource, rtex->size,
+					base_align, FALSE, usage, high_prio)) {
 			FREE(rtex);
 			return NULL;
 		}

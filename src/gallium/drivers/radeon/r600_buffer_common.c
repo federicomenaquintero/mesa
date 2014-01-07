@@ -25,7 +25,6 @@
  */
 
 #include "r600_cs.h"
-#include "util/u_format.h"
 #include "util/u_memory.h"
 #include "util/u_upload_mgr.h"
 #include <inttypes.h>
@@ -99,15 +98,10 @@ void *r600_buffer_map_sync_with_rings(struct r600_common_context *ctx,
 bool r600_init_resource(struct r600_common_screen *rscreen,
 			struct r600_resource *res,
 			unsigned size, unsigned alignment,
-			bool use_reusable_pool, unsigned usage)
+			bool use_reusable_pool, unsigned usage,
+			bool high_prio)
 {
 	uint32_t initial_domain, domains;
-	bool high_prio = false;
-
-	/* If it's depth or MSAA, consider it high priority */
-	if (util_format_has_depth(util_format_description(res->b.b.format)) ||
-		res->b.b.nr_samples > 1)
-		high_prio = true;
 
 	switch(usage) {
 	case PIPE_USAGE_STAGING:
@@ -322,7 +316,7 @@ struct pipe_resource *r600_buffer_create(struct pipe_screen *screen,
 	rbuffer->b.vtbl = &r600_buffer_vtbl;
 	util_range_init(&rbuffer->valid_buffer_range);
 
-	if (!r600_init_resource(rscreen, rbuffer, templ->width0, alignment, TRUE, templ->usage)) {
+	if (!r600_init_resource(rscreen, rbuffer, templ->width0, alignment, TRUE, templ->usage, FALSE)) {
 		FREE(rbuffer);
 		return NULL;
 	}
