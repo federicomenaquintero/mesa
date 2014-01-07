@@ -85,9 +85,7 @@ radeon_drm_winsys(struct radeon_winsys *base)
     return (struct radeon_drm_winsys*)base;
 }
 
-static INLINE unsigned long long stats_time_get(struct radeon_winsys * const ws) {
-    const struct radeon_drm_winsys * const dws = radeon_drm_winsys(ws);
-
+static INLINE unsigned long long stats_time_get(struct radeon_drm_winsys * const dws) {
     return p_atomic_read(&dws->time);
 }
 
