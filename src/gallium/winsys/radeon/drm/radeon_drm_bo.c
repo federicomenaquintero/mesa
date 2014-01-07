@@ -370,7 +370,7 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
 {
     struct radeon_bo *bo = radeon_bo(_buf);
     struct radeon_bomgr *mgr = bo->mgr;
-    struct radeon_winsys *ws = (struct radeon_winsys *) mgr->rws;
+    struct radeon_drm_winsys *ws = mgr->rws;
     struct drm_gem_close args;
 
     memset(&args, 0, sizeof(args));
@@ -456,7 +456,7 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
 {
     struct radeon_bo *bo = (struct radeon_bo*)buf;
     struct radeon_drm_cs *cs = (struct radeon_drm_cs*)rcs;
-    struct radeon_winsys *ws = (struct radeon_winsys *) bo->mgr->rws;
+    struct radeon_drm_winsys *ws = bo->mgr->rws;
 
     /* If it's not unsynchronized bo_map, flush CS if needed and then wait. */
     if (!(usage & PIPE_TRANSFER_UNSYNCHRONIZED)) {
@@ -576,7 +576,6 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
 {
     struct radeon_bomgr *mgr = radeon_bomgr(_mgr);
     struct radeon_drm_winsys *rws = mgr->rws;
-    struct radeon_winsys *ws = (struct radeon_winsys *) rws;
     struct radeon_bo *bo;
     struct drm_radeon_gem_create args;
     struct radeon_bo_desc *rdesc = (struct radeon_bo_desc*)desc;
@@ -653,9 +652,9 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
 
     bo->stats.high_prio = rdesc->high_prio;
 
-    if (ws->bo_stats_file) {
-        fprintf(ws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
-                                   bo->stats.high_prio, stats_time_get(ws));
+    if (rws->bo_stats_file) {
+        fprintf(rws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
+                                   bo->stats.high_prio, stats_time_get(rws));
     }
 
     return &bo->base;

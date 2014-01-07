@@ -344,7 +344,7 @@ static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
 {
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_bo *bo = (struct radeon_bo*)buf;
-    struct radeon_winsys *ws = (struct radeon_winsys *) cs->ws;
+    struct radeon_drm_winsys *ws = cs->ws;
     enum radeon_bo_domain added_domains;
     unsigned index = radeon_add_reloc(cs, bo, usage, domains, &added_domains);
 

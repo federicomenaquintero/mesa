@@ -45,6 +45,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef __GLIBC__
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <errno.h>
+#endif
+
 /*
  * this are copy from radeon_drm, once an updated libdrm is released
  * we should bump configure.ac requirement for it and remove the following
@@ -435,6 +442,12 @@ static void radeon_winsys_destroy(struct radeon_winsys *rws)
     ws->kill_timing_thread = 1;
     pipe_thread_wait(ws->timing_thread);
 
+    if (ws->bo_stats_file) {
+        fflush(ws->bo_stats_file);
+        fclose(ws->bo_stats_file);
+        ws->bo_stats_file = NULL;
+    }
+
     pipe_mutex_destroy(ws->hyperz_owner_mutex);
     pipe_mutex_destroy(ws->cmask_owner_mutex);
     pipe_mutex_destroy(ws->cs_stack_lock);
@@ -518,6 +531,27 @@ static uint64_t radeon_query_value(struct radeon_winsys *rws,
         return ts;
     }
     return 0;
+}
+
+static void radeon_enable_bo_stats(struct radeon_winsys *rws)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+
+    char statsfile[80];
+    const pid_t pid = getpid();
+
+#ifdef __GLIBC__
+    snprintf(statsfile, 80, "/tmp/bostats.%u.%s", pid, program_invocation_short_name);
+#else
+    snprintf(statsfile, 80, "/tmp/bostats.%u", pid);
+#endif
+
+    ws->bo_stats_file = fopen(statsfile, "w");
+    if (!ws->bo_stats_file)
+        fprintf(stderr, "Failed to open bo stats file %s\n", statsfile);
+    else
+        fprintf(ws->bo_stats_file, "started @%llu\n",
+            stats_time_get(ws));
 }
 
 static unsigned hash_fd(void *key)
@@ -656,6 +690,7 @@ PUBLIC struct radeon_winsys *radeon_drm_winsys_create(int fd)
     ws->base.surface_init = radeon_drm_winsys_surface_init;
     ws->base.surface_best = radeon_drm_winsys_surface_best;
     ws->base.query_value = radeon_query_value;
+    ws->base.enable_bo_stats = radeon_enable_bo_stats;
 
     radeon_bomgr_init_functions(ws);
     radeon_drm_cs_init_functions(ws);

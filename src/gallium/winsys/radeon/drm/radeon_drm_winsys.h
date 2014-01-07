@@ -77,6 +77,8 @@ struct radeon_drm_winsys {
     pipe_thread timing_thread;
     int kill_timing_thread;
     uint64_t time;
+
+    FILE *bo_stats_file;
 };
 
 static INLINE struct radeon_drm_winsys *
