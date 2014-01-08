@@ -379,6 +379,15 @@ struct pipe_context {
                          const struct pipe_box *,
                          struct pipe_transfer **out_transfer);
 
+   /**
+    * Tell the driver we're using a mapped resource.
+    *
+    * As drivers move to have buffers continuously mapped, this info
+    * can be used as a hint on where to place the buffer.
+    */
+   void (*mapped_use_hint)(struct pipe_context *,
+                           struct pipe_resource *resource);
+
    /* If transfer was created with WRITE|FLUSH_EXPLICIT, only the
     * regions specified with this call are guaranteed to be written to
     * the resource.

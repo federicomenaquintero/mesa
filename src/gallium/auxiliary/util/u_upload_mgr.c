@@ -194,6 +194,9 @@ enum pipe_error u_upload_alloc( struct u_upload_mgr *upload,
       }
 
       upload->map -= offset;
+   } else if (upload->pipe->mapped_use_hint) {
+      /* Tell the driver we're doing a cpu op in this buffer, for optimization */
+      upload->pipe->mapped_use_hint(upload->pipe, upload->buffer);
    }
 
    assert(offset < upload->buffer->width0);
