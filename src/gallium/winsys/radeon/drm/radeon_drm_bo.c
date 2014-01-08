@@ -525,12 +525,7 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
         }
     }
 
-    if (ws->bo_stats_file) {
-        fprintf(ws->bo_stats_file, "%p cpu mapped @%llu\n", bo, stats_time_get(ws));
-    }
-
-    bo->stats.num_cpu_ops++;
-    bo->stats.last_cpu_time = stats_time_get(ws);
+    ws->base.update_bo_stats_cpu((struct radeon_winsys *) ws, buf);
 
     return radeon_bo_do_map(bo);
 }

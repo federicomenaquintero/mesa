@@ -588,6 +588,20 @@ static void radeon_update_bo_stats(struct radeon_winsys *rws,
     }
 }
 
+static void radeon_update_bo_stats_cpu(struct radeon_winsys *rws,
+                                       struct radeon_winsys_cs_handle *buf)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+    struct radeon_bo *bo = (struct radeon_bo*)buf;
+
+    if (ws->bo_stats_file) {
+        fprintf(ws->bo_stats_file, "%p cpu mapped @%llu\n", bo, stats_time_get(ws));
+    }
+
+    bo->stats.num_cpu_ops++;
+    bo->stats.last_cpu_time = stats_time_get(ws);
+}
+
 static unsigned hash_fd(void *key)
 {
     int fd = pointer_to_intptr(key);
@@ -726,6 +740,7 @@ PUBLIC struct radeon_winsys *radeon_drm_winsys_create(int fd)
     ws->base.query_value = radeon_query_value;
     ws->base.enable_bo_stats = radeon_enable_bo_stats;
     ws->base.update_bo_stats = radeon_update_bo_stats;
+    ws->base.update_bo_stats_cpu = radeon_update_bo_stats_cpu;
 
     radeon_bomgr_init_functions(ws);
     radeon_drm_cs_init_functions(ws);

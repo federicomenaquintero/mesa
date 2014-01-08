@@ -554,6 +554,15 @@ struct radeon_winsys {
     void (*update_bo_stats)(struct radeon_winsys *rws,
                             struct radeon_winsys_cs_handle *buf,
                             enum radeon_bo_usage usage);
+
+    /**
+     * Update bo statistics for cpu.
+     * The buf param matches that in cs_add_reloc.
+     *
+     * \param buf A winsys buffer to validate.
+     */
+    void (*update_bo_stats_cpu)(struct radeon_winsys *rws,
+                            struct radeon_winsys_cs_handle *buf);
 };
 
 /**
