@@ -550,10 +550,13 @@ static void radeon_enable_bo_stats(struct radeon_winsys *rws)
     char statsfile[80];
     const pid_t pid = getpid();
 
+    const char *tmpdir = getenv("TMPDIR");
+    if (!tmpdir) tmpdir = "/tmp";
+
 #ifdef __GLIBC__
-    snprintf(statsfile, 80, "/tmp/bostats.%u.%s", pid, program_invocation_short_name);
+    snprintf(statsfile, 80, "%s/bostats.%u.%s", tmpdir, pid, program_invocation_short_name);
 #else
-    snprintf(statsfile, 80, "/tmp/bostats.%u", pid);
+    snprintf(statsfile, 80, "%s/bostats.%u", tmpdir, pid);
 #endif
 
     ws->bo_stats_file = fopen(statsfile, "w");
