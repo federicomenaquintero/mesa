@@ -1041,7 +1041,7 @@ r300_texture_create_object(struct r300_screen *rscreen,
 
     /* Create the backing buffer if needed. */
     if (!tex->buf) {
-        tex->buf = rws->buffer_create(rws, tex->tex.size_in_bytes, 2048, TRUE,
+        tex->buf = rws->buffer_create(rws, tex->tex.size_in_bytes, 2048, TRUE, FALSE,
                                       tex->domain);
 
         if (!tex->buf) {
