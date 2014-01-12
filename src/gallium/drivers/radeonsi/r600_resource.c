@@ -52,8 +52,23 @@ void r600_init_screen_resource_functions(struct pipe_screen *screen)
 	screen->resource_destroy = u_resource_destroy_vtbl;
 }
 
+static void r600_mapped_use_hint(struct pipe_context *pipe,
+                                struct pipe_resource *resource)
+{
+        // I have no idea but it looks a bit like I should use this
+        struct r600_context *rctx = (struct r600_context*)pipe;
+        // But what about the r600 common context? Is it completely reused from r600g?
+        struct r600_common_context *ctx = (struct r600_common_context*)rctx;
+
+        // this comes from r600g?
+        struct r600_resource *res = r600_resource(resource);
+
+        ctx->ws->update_bo_stats_cpu(ctx->ws, res->cs_buf);
+}
+
 void r600_init_context_resource_functions(struct r600_context *r600)
 {
+        r600->b.b.mapped_use_hint = r600_mapped_use_hint;
 	r600->b.b.transfer_map = u_transfer_map_vtbl;
 	r600->b.b.transfer_flush_region = u_default_transfer_flush_region;
 	r600->b.b.transfer_unmap = u_transfer_unmap_vtbl;
