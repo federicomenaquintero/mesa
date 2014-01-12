@@ -563,7 +563,7 @@ static void radeon_enable_bo_stats(struct radeon_winsys *rws)
     if (!ws->bo_stats_file)
         fprintf(stderr, "Failed to open bo stats file %s\n", statsfile);
     else
-        fprintf(ws->bo_stats_file, "started @%llu\n",
+        fprintf(ws->bo_stats_file, "started SI @%llu\n",
             stats_time_get(ws));
 }
 
