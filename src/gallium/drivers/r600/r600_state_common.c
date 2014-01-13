@@ -563,6 +563,7 @@ static void r600_set_vertex_buffers(struct pipe_context *ctx,
 		i = u_bit_scan(&skipped_mask);
 
 		rbuffer = (struct r600_resource*)vb[i].buffer;
+		if (!rbuffer) continue;
 		rctx->b.ws->update_bo_stats(rctx->b.ws, rbuffer->cs_buf, RADEON_USAGE_READ);
 	}
 }
@@ -672,6 +673,8 @@ static void r600_set_sampler_views(struct pipe_context *pipe, unsigned shader,
 	skipped_mask = dst->views.enabled_mask & ~dst->views.dirty_mask;
 	while (skipped_mask) {
 		i = u_bit_scan(&skipped_mask);
+
+		if (!rviews[i]) continue;
 
 		rctx->b.ws->update_bo_stats(rctx->b.ws,
 						rviews[i]->tex_resource->cs_buf,
