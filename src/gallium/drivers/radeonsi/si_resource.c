@@ -52,8 +52,18 @@ void si_init_screen_resource_functions(struct pipe_screen *screen)
 	screen->resource_destroy = u_resource_destroy_vtbl;
 }
 
+static void si_mapped_use_hint(struct pipe_context *pipe,
+				struct pipe_resource *resource)
+{
+	struct r600_common_context *ctx = (struct r600_common_context*)pipe;
+	struct r600_resource *res = r600_resource(resource);
+
+	ctx->ws->update_bo_stats_cpu(ctx->ws, res->cs_buf);
+}
+
 void si_init_context_resource_functions(struct si_context *sctx)
 {
+	sctx->b.b.mapped_use_hint = si_mapped_use_hint;
 	sctx->b.b.transfer_map = u_transfer_map_vtbl;
 	sctx->b.b.transfer_flush_region = u_default_transfer_flush_region;
 	sctx->b.b.transfer_unmap = u_transfer_unmap_vtbl;
