@@ -234,6 +234,23 @@ drisw_allocate_textures(struct dri_drawable *drawable,
 
       drawable->textures[statts[i]] =
          screen->base.screen->resource_create(screen->base.screen, &templ);
+
+      if (statts[i] == ST_ATTACHMENT_FRONT_LEFT && drawable->textures[ST_ATTACHMENT_BACK_LEFT]) {
+	 struct pipe_screen *pscreen = screen->base.screen;
+	 struct pipe_context *pipe;
+
+	 /* Up to now, there was no FRONT_LEFT, and all output has been from the
+	  * BACK_LEFT texture.  The user expects the contents of FRONT_LEFT to
+	  * be equal to those of BACK_LEFT at some recent point, so make a copy.
+	  */
+
+	 pipe = pscreen->context_create(pscreen, NULL);
+	 dri_pipe_blit(pipe,
+		       drawable->textures[ST_ATTACHMENT_FRONT_LEFT],
+		       drawable->textures[ST_ATTACHMENT_BACK_LEFT]);
+	 pipe->flush(pipe, NULL, 0);
+	 pipe->destroy(pipe);
+      }
    }
 
    drawable->old_w = width;
