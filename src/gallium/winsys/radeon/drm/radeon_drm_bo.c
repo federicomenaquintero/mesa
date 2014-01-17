@@ -1044,6 +1044,10 @@ done:
         break;
     }
 
+    if (ws->bo_stats_file) {
+        fprintf(ws->bo_stats_file, "%p created, size %u, prio %u, @%llu\n", bo, size,
+                                   bo->stats.high_prio, stats_time_get(ws));
+    }
 
     return (struct pb_buffer*)bo;
 
