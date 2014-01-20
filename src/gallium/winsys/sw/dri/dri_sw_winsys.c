@@ -26,6 +26,7 @@
  *
  **************************************************************************/
 
+#include <stdio.h>
 #include "pipe/p_compiler.h"
 #include "pipe/p_format.h"
 #include "util/u_inlines.h"
@@ -103,6 +104,7 @@ dri_sw_displaytarget_create(struct sw_winsys *winsys,
    size = dri_sw_dt->stride * nblocksy;
 
    dri_sw_dt->data = align_malloc(size, alignment);
+   fprintf (stderr, "dri_sw_displaytarget_create(): allocated dri_sw_dt->data=%p, width=%u, height=%u\n", dri_sw_dt->data, dri_sw_dt->width, dri_sw_dt->height);
    if(!dri_sw_dt->data)
       goto no_data;
 
@@ -121,6 +123,7 @@ dri_sw_displaytarget_destroy(struct sw_winsys *ws,
 {
    struct dri_sw_displaytarget *dri_sw_dt = dri_sw_displaytarget(dt);
 
+   fprintf (stderr, "dri_sw_displaytarget_destroy(): Destroying dri_sw_dt->data=%p, width=%u, height=%u\n", dri_sw_dt->data, dri_sw_dt->width, dri_sw_dt->height);
    FREE(dri_sw_dt->data);
 
    FREE(dri_sw_dt);
@@ -133,6 +136,7 @@ dri_sw_displaytarget_map(struct sw_winsys *ws,
 {
    struct dri_sw_displaytarget *dri_sw_dt = dri_sw_displaytarget(dt);
    dri_sw_dt->mapped = dri_sw_dt->data;
+   /* fprintf (stderr, "dri_sw_displaytarget_map(): Mapping dri_sw_dt->data=%p\n", dri_sw_dt->data); */
    return dri_sw_dt->mapped;
 }
 
@@ -141,6 +145,7 @@ dri_sw_displaytarget_unmap(struct sw_winsys *ws,
                            struct sw_displaytarget *dt)
 {
    struct dri_sw_displaytarget *dri_sw_dt = dri_sw_displaytarget(dt);
+   /* fprintf (stderr, "dri_sw_displaytarget_unmap(): Unmapping dri_sw_dt->mapped=%p\n", dri_sw_dt->mapped); */
    dri_sw_dt->mapped = NULL;
 }
 
@@ -181,6 +186,7 @@ dri_sw_displaytarget_display(struct sw_winsys *ws,
 
    height = dri_sw_dt->height;
 
+   fprintf (stderr, "dri_sw_displaytarget_display(): Calling dri_sw_ws->lf->put_image(..., dri_sw_dt->data=%p, %u, %u)\n", dri_sw_dt->data, width, height);
    dri_sw_ws->lf->put_image(dri_drawable, dri_sw_dt->data, width, height);
 }
 

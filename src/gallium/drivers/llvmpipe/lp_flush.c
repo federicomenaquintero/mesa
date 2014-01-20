@@ -48,17 +48,37 @@ llvmpipe_flush( struct pipe_context *pipe,
                 const char *reason)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context(pipe);
+   static enum {
+      UNINITED,
+      DEFAULT,
+      WRITE_BMP,
+   } envvar_write_bmp = UNINITED;
+   static boolean writing_bmp = FALSE;
 
    draw_flush(llvmpipe->draw);
 
    /* ask the setup module to flush */
    lp_setup_flush(llvmpipe->setup, fence, reason);
 
+   if (envvar_write_bmp == UNINITED) {
+      const char *val;
+
+      val = getenv ("LLVMPIPE_WRITE_BMP_DURING_FLUSH");
+      if (val != NULL)
+	 envvar_write_bmp = WRITE_BMP;
+      else
+	 envvar_write_bmp = DEFAULT;
+   }
+
    /* Enable to dump BMPs of the color/depth buffers each frame */
-   if (0) {
+   if (envvar_write_bmp == WRITE_BMP && !writing_bmp) {
       static unsigned frame_no = 1;
       char filename[256];
       unsigned i;
+
+      fprintf (stderr, "llvmpipe_flush(): writing frame %u\n", frame_no);
+
+      writing_bmp = TRUE;
 
       for (i = 0; i < llvmpipe->framebuffer.nr_cbufs; i++) {
          util_snprintf(filename, sizeof(filename), "cbuf%u_%u", i, frame_no);
@@ -71,6 +91,8 @@ llvmpipe_flush( struct pipe_context *pipe,
       }
 
       ++frame_no;
+
+      writing_bmp = FALSE;
    }
 }
 

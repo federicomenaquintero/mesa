@@ -30,6 +30,7 @@
   *   Michel Dänzer <michel@tungstengraphics.com>
   */
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "pipe/p_context.h"
@@ -196,12 +197,21 @@ llvmpipe_displaytarget_layout(struct llvmpipe_screen *screen,
    lpr->num_slices_faces[0] = 1;
    lpr->img_stride[0] = 0;
 
+   if (lpr->dt != NULL) {
+      fprintf (stderr, "llvmpipe_displaytarget_layout(): Error: lpr->dt is not NULL and we tried to overwrite it!\n");
+      abort ();
+   }
+
+   fprintf (stderr, "llvmpipe_displaytarget_layout(lpr=%p) {\n", lpr);
+
    lpr->dt = winsys->displaytarget_create(winsys,
                                           lpr->base.bind,
                                           lpr->base.format,
                                           width, height,
                                           16,
                                           &lpr->row_stride[0] );
+   fprintf (stderr, "} llvmpipe_displaytarget_layout(): lpr->dt=%p from winsys->displaytarget_create()\n",
+	    lpr->dt);
 
    if (lpr->dt == NULL)
       return FALSE;
@@ -228,6 +238,8 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
    struct llvmpipe_resource *lpr = CALLOC_STRUCT(llvmpipe_resource);
    if (!lpr)
       return NULL;
+
+   fprintf (stderr, "llvmpipe_resource_create(): creating lpr=%p {\n", lpr);
 
    lpr->base = *templat;
    pipe_reference_init(&lpr->base.reference, 1);
@@ -262,6 +274,7 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
        * offset doesn't need to be aligned to LP_RASTER_BLOCK_SIZE.
        */
       lpr->data = align_malloc(bytes + (LP_RASTER_BLOCK_SIZE - 1) * 4 * sizeof(float), 16);
+      fprintf (stderr, "llvmpipe_resource_create(): allocated lpr->data=%p\n", lpr->data);
       /*
        * buffers don't really have stride but it's probably safer
        * (for code doing same calculations for buffers and textures)
@@ -278,6 +291,8 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
 #ifdef DEBUG
    insert_at_tail(&resource_list, lpr);
 #endif
+
+   fprintf (stderr, "} llvmpipe_resource_create(): created lpr=%p\n", lpr);
 
    return &lpr->base;
 
@@ -360,6 +375,8 @@ llvmpipe_resource_map(struct pipe_resource *resource,
 
       /* install this linear image in texture data structure */
       lpr->linear_img.data = map;
+      fprintf (stderr, "llvmpipe_resource_map(): Got lpr->linear_img.data=%p from winsys->displaytarget_map()\n",
+	       lpr->linear_img.data);
 
       return map;
    }
@@ -762,6 +779,8 @@ alloc_image_data(struct llvmpipe_resource *lpr)
       lpr->linear_img.data =
          winsys->displaytarget_map(winsys, lpr->dt,
                                    PIPE_TRANSFER_READ_WRITE);
+      fprintf (stderr, "alloc_image_data(): Got lpr->linear_img.data=%p from winsys->displaytarget_map()\n",
+	       lpr->linear_img.data);
    }
    else {
       /* not a display target - allocate regular memory */
@@ -775,6 +794,8 @@ alloc_image_data(struct llvmpipe_resource *lpr)
          offset += align(buffer_size, alignment);
       }
       lpr->linear_img.data = align_malloc(offset, alignment);
+      fprintf (stderr, "alloc_image_data(): Got lpr->linear_img.data=%p from align_malloc()\n",
+	       lpr->linear_img.data);
       if (lpr->linear_img.data) {
          memset(lpr->linear_img.data, 0, offset);
       }

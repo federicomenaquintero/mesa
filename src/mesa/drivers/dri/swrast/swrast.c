@@ -306,6 +306,7 @@ swrast_alloc_back_storage(struct gl_context *ctx, struct gl_renderbuffer *rb,
     swrast_alloc_front_storage(ctx, rb, internalFormat, width, height);
 
     xrb->Base.Buffer = malloc(height * xrb->pitch);
+    fprintf (stderr, "swrast_alloc_back_storage(): allocated %p with %ux%u bytes, pitch %d\n", xrb->Base.Buffer, width, height, xrb->pitch);
 
     return GL_TRUE;
 }
@@ -396,6 +397,7 @@ swrast_map_renderbuffer(struct gl_context *ctx,
 
       stride = w * cpp;
       xrb->Base.Buffer = malloc(h * stride);
+      fprintf (stderr, "swrast_map_renderbuffer(): allocated %p with %ux%u bytes, stride %d\n", xrb->Base.Buffer, w, h, stride);
 
       sPriv->swrast_loader->getImage(dPriv, x, y, w, h,
 				     (char *) xrb->Base.Buffer,
@@ -403,6 +405,8 @@ swrast_map_renderbuffer(struct gl_context *ctx,
 
       *out_map = xrb->Base.Buffer;
       *out_stride = stride;
+
+      fprintf (stderr, "swrast_map_renderbuffer(): returning stride %d\n", stride);
       return;
    }
 
@@ -418,6 +422,7 @@ swrast_map_renderbuffer(struct gl_context *ctx,
 
    *out_map = map;
    *out_stride = stride;
+   fprintf (stderr, "swrast_map_renderbuffer(): returning stride %d\n", stride);
 }
 
 static void

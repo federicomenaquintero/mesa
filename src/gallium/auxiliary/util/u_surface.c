@@ -31,6 +31,7 @@
  * @author Brian Paul
  */
 
+#include <stdio.h>
 
 #include "pipe/p_defines.h"
 #include "pipe/p_screen.h"
@@ -125,6 +126,9 @@ util_copy_box(ubyte * dst,
               unsigned src_x, unsigned src_y, unsigned src_z)
 {
    unsigned z;
+   fprintf (stderr, "util_copy_box: (src=%p, x=%u, y=%u, w=%u, h=%u, stride=%u) -> (dst=%p, x=%u, y=%u, stride=%u)\n", src, src_x, src_y, width, height, src_stride, dst, dst_x, dst_y, dst_stride);
+   fprintf (stderr, "               top-left pixel of src buffer is %02x %02x %02x\n", src[0], src[1], src[2]);
+   fprintf (stderr, "               top-left pixel of dst buffer is %02x %02x %02x\n", dst[0], dst[1], dst[2]);
    dst += dst_z * dst_slice_stride;
    src += src_z * src_slice_stride;
    for (z = 0; z < depth; ++z) {

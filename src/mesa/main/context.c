@@ -138,6 +138,7 @@
 
 #include "glsl_parser_extras.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 
 #ifndef MESA_VERBOSE
@@ -1623,11 +1624,13 @@ _mesa_record_error(struct gl_context *ctx, GLenum error)
 void
 _mesa_finish(struct gl_context *ctx)
 {
+   fprintf (stderr, "glFinish() {\n");
    FLUSH_VERTICES( ctx, 0 );
    FLUSH_CURRENT( ctx, 0 );
    if (ctx->Driver.Finish) {
       ctx->Driver.Finish(ctx);
    }
+   fprintf (stderr, "} glFinish()\n");
 }
 
 
@@ -1637,11 +1640,13 @@ _mesa_finish(struct gl_context *ctx)
 void
 _mesa_flush(struct gl_context *ctx)
 {
+   fprintf (stderr, "glFlush() {\n");
    FLUSH_VERTICES( ctx, 0 );
    FLUSH_CURRENT( ctx, 0 );
    if (ctx->Driver.Flush) {
       ctx->Driver.Flush(ctx);
    }
+   fprintf (stderr, "} glFlush()\n");
 }
 
 

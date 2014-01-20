@@ -51,7 +51,7 @@
 
 
 /** Set this to 1 to debug/log glBlitFramebuffer() calls */
-#define DEBUG_BLIT 0
+#define DEBUG_BLIT 1
 
 
 /**
@@ -3433,26 +3433,27 @@ _mesa_BlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
       const struct gl_renderbuffer *colorDrawRb = NULL;
       GLuint i = 0;
 
-      printf("glBlitFramebuffer(%d, %d, %d, %d,  %d, %d, %d, %d,"
-	     " 0x%x, 0x%x)\n",
-	     srcX0, srcY0, srcX1, srcY1,
-	     dstX0, dstY0, dstX1, dstY1,
-	     mask, filter);
+      fprintf(stderr,
+	      "glBlitFramebuffer(%d, %d, %d, %d,  %d, %d, %d, %d,"
+	      " 0x%x, 0x%x) {\n",
+	      srcX0, srcY0, srcX1, srcY1,
+	      dstX0, dstY0, dstX1, dstY1,
+	      mask, filter);
       if (colorReadRb) {
          const struct gl_renderbuffer_attachment *att;
 
          att = find_attachment(readFb, colorReadRb);
-         printf("  Src FBO %u  RB %u (%dx%d)  ",
-		readFb->Name, colorReadRb->Name,
-		colorReadRb->Width, colorReadRb->Height);
+         fprintf(stderr, "  Src FBO %u  RB %u (%dx%d)  ",
+		 readFb->Name, colorReadRb->Name,
+		 colorReadRb->Width, colorReadRb->Height);
          if (att && att->Texture) {
-            printf("Tex %u  tgt 0x%x  level %u  face %u",
-		   att->Texture->Name,
-		   att->Texture->Target,
-		   att->TextureLevel,
-		   att->CubeMapFace);
+	    fprintf(stderr, "Tex %u  tgt 0x%x  level %u  face %u",
+		    att->Texture->Name,
+		    att->Texture->Target,
+		    att->TextureLevel,
+		    att->CubeMapFace);
          }
-         printf("\n");
+         fprintf(stderr, "\n");
 
          /* Print all active color render buffers */
          for (i = 0; i < ctx->DrawBuffer->_NumColorDrawBuffers; i++) {
@@ -3461,17 +3462,17 @@ _mesa_BlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
                continue;
 
             att = find_attachment(drawFb, colorDrawRb);
-            printf("  Dst FBO %u  RB %u (%dx%d)  ",
-		   drawFb->Name, colorDrawRb->Name,
-		   colorDrawRb->Width, colorDrawRb->Height);
+            fprintf(stderr, "  Dst FBO %u  RB %u (%dx%d)  ",
+		    drawFb->Name, colorDrawRb->Name,
+		    colorDrawRb->Width, colorDrawRb->Height);
             if (att && att->Texture) {
-               printf("Tex %u  tgt 0x%x  level %u  face %u",
-		      att->Texture->Name,
-		      att->Texture->Target,
-		      att->TextureLevel,
-		      att->CubeMapFace);
+               fprintf(stderr, "Tex %u  tgt 0x%x  level %u  face %u",
+		       att->Texture->Name,
+		       att->Texture->Target,
+		       att->TextureLevel,
+		       att->CubeMapFace);
             }
-            printf("\n");
+            fprintf(stderr, "\n");
          }
       }
    }
@@ -3487,6 +3488,9 @@ _mesa_BlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
                                srcX0, srcY0, srcX1, srcY1,
                                dstX0, dstY0, dstX1, dstY1,
                                mask, filter);
+
+   if (DEBUG_BLIT)
+      fprintf(stderr, "} glBlitFramebuffer\n");
 }
 
 

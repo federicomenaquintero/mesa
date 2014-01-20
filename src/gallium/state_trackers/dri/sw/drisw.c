@@ -34,6 +34,8 @@
  * for createImage/destroyImage similar to DRI2 getBuffers.
  */
 
+#include <stdio.h>
+
 #include "util/u_format.h"
 #include "util/u_memory.h"
 #include "util/u_inlines.h"
@@ -189,6 +191,21 @@ drisw_flush_frontbuffer(struct dri_context *ctx,
    }
 }
 
+static const char *
+string_from_st_attachment_type (enum st_attachment_type st_att_type)
+{
+   switch (st_att_type) {
+   case ST_ATTACHMENT_FRONT_LEFT:	return "ST_ATTACHMENT_FRONT_LEFT";
+   case ST_ATTACHMENT_BACK_LEFT:	return "ST_ATTACHMENT_BACK_LEFT";
+   case ST_ATTACHMENT_FRONT_RIGHT:	return "ST_ATTACHMENT_FRONT_RIGHT";
+   case ST_ATTACHMENT_BACK_RIGHT:	return "ST_ATTACHMENT_BACK_RIGHT";
+   case ST_ATTACHMENT_DEPTH_STENCIL:	return "ST_ATTACHMENT_DEPTH_STENCIL";
+   case ST_ATTACHMENT_ACCUM:		return "ST_ATTACHMENT_ACCUM";
+   case ST_ATTACHMENT_SAMPLE:		return "ST_ATTACHMENT_SAMPLE";
+   default:				return "INVALID";
+   }
+}
+
 /**
  * Allocate framebuffer attachments.
  *
@@ -266,6 +283,11 @@ drisw_allocate_textures(struct dri_drawable *drawable,
 	 pipe->flush(pipe, NULL, 0);
 	 pipe->destroy(pipe);
       }
+
+      fprintf (stderr, "drisw_allocate_textures(drawable=%p): created drawable->textures[%s]=%p from screen->base.screen->resource_create()\n",
+	       drawable,
+	       string_from_st_attachment_type (statts[i]),
+	       drawable->textures[statts[i]]);
    }
 
    drawable->old_w = width;
