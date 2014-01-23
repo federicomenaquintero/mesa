@@ -186,7 +186,7 @@ dri_sw_displaytarget_display(struct sw_winsys *ws,
 
    height = dri_sw_dt->height;
 
-   fprintf (stderr, "dri_sw_displaytarget_display(): Calling dri_sw_ws->lf->put_image(..., dri_sw_dt->data=%p, %u, %u)\n", dri_sw_dt->data, width, height);
+   fprintf (stderr, "  dri_sw_displaytarget_display(): Calling dri_sw_ws->lf->put_image(..., dri_sw_dt=%p, dri_sw_dt->data=%p, %u, %u)\n", dri_sw_dt, dri_sw_dt->data, width, height);
    dri_sw_ws->lf->put_image(dri_drawable, dri_sw_dt->data, width, height);
 }
 

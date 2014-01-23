@@ -111,6 +111,8 @@ drisw_present_texture(__DRIdrawable *dPriv,
    if (swrast_no_present)
       return;
 
+   fprintf (stderr, "  drisw_present_texture (drawable=%p, ptex=%p)\n", drawable, ptex);
+
    screen->base.screen->flush_frontbuffer(screen->base.screen, ptex, 0, 0, drawable);
 }
 
@@ -284,7 +286,7 @@ drisw_allocate_textures(struct dri_drawable *drawable,
 	 pipe->destroy(pipe);
       }
 
-      fprintf (stderr, "drisw_allocate_textures(drawable=%p): created drawable->textures[%s]=%p from screen->base.screen->resource_create()\n",
+      fprintf (stderr, "  drisw_allocate_textures(drawable=%p): created drawable->textures[%s]=%p\n",
 	       drawable,
 	       string_from_st_attachment_type (statts[i]),
 	       drawable->textures[statts[i]]);
