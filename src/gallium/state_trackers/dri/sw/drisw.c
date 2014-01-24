@@ -208,6 +208,63 @@ string_from_st_attachment_type (enum st_attachment_type st_att_type)
    }
 }
 
+/* From lp_limits.h */
+#define LP_MAX_TEXTURE_2D_LEVELS 14  /* 8K x 8K for now */
+#define LP_MAX_TEXTURE_LEVELS LP_MAX_TEXTURE_2D_LEVELS
+
+/* From lp_texture.h */
+struct my_llvmpipe_resource
+{
+   struct pipe_resource base;
+
+   /** Row stride in bytes */
+   unsigned row_stride[LP_MAX_TEXTURE_LEVELS];
+   /** Image stride (for cube maps, array or 3D textures) in bytes */
+   unsigned img_stride[LP_MAX_TEXTURE_LEVELS];
+   /** Number of 3D slices or cube faces per level */
+   unsigned num_slices_faces[LP_MAX_TEXTURE_LEVELS];
+   /** Offset to start of mipmap level, in bytes */
+   unsigned linear_mip_offsets[LP_MAX_TEXTURE_LEVELS];
+
+   /**
+    * Display target, for textures with the PIPE_BIND_DISPLAY_TARGET
+    * usage.
+    */
+   struct sw_displaytarget *dt;
+#if 0
+   /**
+    * Malloc'ed data for regular textures, or a mapping to dt above.
+    */
+   struct llvmpipe_texture_image linear_img;
+
+   /**
+    * Data for non-texture resources.
+    */
+   void *data;
+
+   boolean userBuffer;  /** Is this a user-space buffer? */
+   unsigned timestamp;
+
+   unsigned id;  /**< temporary, for debugging */
+
+#ifdef DEBUG
+   /** for linked list */
+   struct llvmpipe_resource *prev, *next;
+#endif
+#endif
+};
+
+struct my_dri_sw_displaytarget
+{
+   enum pipe_format format;
+   unsigned width;
+   unsigned height;
+   unsigned stride;
+
+   void *data;
+   void *mapped;
+};
+
 /**
  * Allocate framebuffer attachments.
  *
@@ -249,6 +306,7 @@ drisw_allocate_textures(struct dri_drawable *drawable,
    for (i = 0; i < count; i++) {
       enum pipe_format format;
       unsigned bind;
+      struct my_llvmpipe_resource *lpr;
 
       /* the texture already exists or not requested */
       if (drawable->textures[statts[i]])
@@ -286,10 +344,17 @@ drisw_allocate_textures(struct dri_drawable *drawable,
 	 pipe->destroy(pipe);
       }
 
-      fprintf (stderr, "  drisw_allocate_textures(drawable=%p): created drawable->textures[%s]=%p\n",
+      lpr = (struct my_llvmpipe_resource *) drawable->textures[statts[i]];
+
+      fprintf (stderr, "  drisw_allocate_textures(): allocated drawable=%p\n"
+               "                                               drawable->textures[%s]=%p = lpr\n"
+               "                                                   lpr->dt=%p\n"
+               "                                                   lpr->dt->data=%p\n",
 	       drawable,
 	       string_from_st_attachment_type (statts[i]),
-	       drawable->textures[statts[i]]);
+	       drawable->textures[statts[i]],
+               lpr->dt,
+               lpr->dt ? ((struct my_dri_sw_displaytarget *) lpr->dt)->data : NULL);
    }
 
    drawable->old_w = width;

@@ -104,7 +104,7 @@ dri_sw_displaytarget_create(struct sw_winsys *winsys,
    size = dri_sw_dt->stride * nblocksy;
 
    dri_sw_dt->data = align_malloc(size, alignment);
-   fprintf (stderr, "dri_sw_displaytarget_create(): allocated dri_sw_dt->data=%p, width=%u, height=%u\n", dri_sw_dt->data, dri_sw_dt->width, dri_sw_dt->height);
+   fprintf (stderr, "dri_sw_displaytarget_create(): allocated dri_sw_dt=%p, dri_sw_dt->data=%p, width=%u, height=%u\n", dri_sw_dt, dri_sw_dt->data, dri_sw_dt->width, dri_sw_dt->height);
    if(!dri_sw_dt->data)
       goto no_data;
 

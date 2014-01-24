@@ -255,8 +255,6 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
    if (!lpr)
       return NULL;
 
-   fprintf (stderr, "  llvmpipe_resource_create(): creating lpr=%p {\n", lpr);
-
    lpr->base = *templat;
    pipe_reference_init(&lpr->base.reference, 1);
    lpr->base.screen = &screen->base;
@@ -307,7 +305,7 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
    insert_at_tail(&resource_list, lpr);
 #endif
 
-   fprintf (stderr, "  } llvmpipe_resource_create(): created lpr=%p\n", lpr);
+   fprintf (stderr, "  llvmpipe_resource_create(): created lpr=%p\n", lpr);
 
    return &lpr->base;
 
