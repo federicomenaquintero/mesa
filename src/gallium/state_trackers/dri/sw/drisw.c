@@ -126,7 +126,22 @@ static INLINE void
 drisw_copy_to_front(__DRIdrawable * dPriv,
                     struct pipe_resource *ptex)
 {
+   struct dri_drawable *drawable = dri_drawable(dPriv);
+
    drisw_present_texture(dPriv, ptex);
+
+   if (drawable->textures[ST_ATTACHMENT_FRONT_LEFT]) {
+      struct dri_screen *screen = dri_screen(drawable->sPriv);
+      struct pipe_screen *pscreen = screen->base.screen;
+      struct pipe_context *pipe;
+
+      pipe = pscreen->context_create(pscreen, NULL);
+      dri_pipe_blit(pipe,
+                    drawable->textures[ST_ATTACHMENT_FRONT_LEFT],
+                    ptex);
+      pipe->flush(pipe, NULL, 0);
+      pipe->destroy(pipe);
+   }
 
    drisw_invalidate_drawable(dPriv);
 }
