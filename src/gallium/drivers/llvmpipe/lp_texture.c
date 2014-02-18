@@ -209,7 +209,7 @@ llvmpipe_displaytarget_layout(struct llvmpipe_screen *screen,
    lpr->img_stride[0] = 0;
 
    if (lpr->dt != NULL) {
-      fprintf (stderr, "    llvmpipe_displaytarget_layout(): Error: lpr->dt is not NULL and we tried to overwrite it!\n");
+      fprintf (stderr, "  llvmpipe_displaytarget_layout(): Error: lpr->dt is not NULL and we tried to overwrite it!\n");
       abort ();
    }
 
@@ -222,9 +222,9 @@ llvmpipe_displaytarget_layout(struct llvmpipe_screen *screen,
 
    my_dri_sw_dt = (struct my_dri_sw_displaytarget *) lpr->dt;
    fprintf (stderr,
-            "    llvmpipe_displaytarget_layout(): llvmpipe_resource *lpr=%p\n"
-            "                                     created lpr->dt=%p from winsys->displaytarget_create()\n"
-            "                                     lpr->dt->data=%p, width=%d, height=%d\n",
+            "  llvmpipe_displaytarget_layout(): llvmpipe_resource *lpr=%p\n"
+            "                                   created lpr->dt=%p from winsys->displaytarget_create()\n"
+            "                                   lpr->dt->data=%p, width=%d, height=%d\n",
             lpr,
 	    lpr->dt,
             my_dri_sw_dt->data, width, height);
@@ -304,8 +304,6 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
 #ifdef DEBUG
    insert_at_tail(&resource_list, lpr);
 #endif
-
-   fprintf (stderr, "  llvmpipe_resource_create(): created lpr=%p\n", lpr);
 
    return &lpr->base;
 
